@@ -88,7 +88,7 @@ def gconnect():
     stored_access_token = login_session.get('access_token')
     stored_gplus_id = login_session.get('gplus_id')
     if (stored_access_token is not None and
-        gplus_id == stored_gplus_id):
+       gplus_id == stored_gplus_id):
         response = make_response(json.dumps(
             'Current user is already connected.'), 200)
         response.headers['Content-Type'] = 'application/json'
@@ -111,9 +111,7 @@ def gconnect():
 
     user_id = getUserID(login_session['email'])
     if not user_id:
-        print("HERE")
         user_id = createUser(login_session)
-    print("HERE!")
     login_session['user_id'] = user_id
 
     output = ''
@@ -195,7 +193,6 @@ def showDevice(electronic_name, device_id):
     device = session.query(Device).filter_by(
         id=device_id).one()
     if 'username' in login_session:
-        print(electronic_name)
         return render_template('device.html', name=electronic_name,
                                device=device)
     else:
@@ -222,7 +219,7 @@ def getUserID(email):
     try:
         user = session.query(User).filter_by(email=email).one()
         return user.id
-    except:
+    except Exception:
         return None
 
 # Create a new device
@@ -234,7 +231,6 @@ def newDevice():
         electronic = session.query(Electronics).filter_by(
             name=str(request.form['category'])).one().id
         length = session.query(Device).order_by(Device.id.desc()).first().id+1
-        print session.query(Device).order_by(Device.id.desc()).first().id
         newDevice = Device(name=request.form['name'], id=length,
                            brand=request.form['brand'],
                            year=request.form['year'],
@@ -256,6 +252,13 @@ def newDevice():
 def editDevice(electronic_name, device_id):
     editedDevice = session.query(
         Device).filter_by(id=device_id).one()
+    if 'username' not in login_session:
+        return redirect('/login')
+    if editedDevice.user_id != login_session['user_id']:
+        return """<script>function myFunction()\
+               {alert('You are not authorized to edit this restaurant.\
+               Please create your own restaurant in order to edit.');}\
+               </script><body onload='myFunction()''>"""
     if request.method == 'POST':
         if request.form['name']:
             editedDevice.name = request.form['name']
@@ -265,6 +268,7 @@ def editDevice(electronic_name, device_id):
             editedDevice.price = "$"+request.form['price']
             editedDevice.electronics_id = session.query(Electronics).filter_by(
                 name=str(request.form['category'])).one().id
+            session.commit()
             flash('Device Successfully Edited %s' % editedDevice.name)
             return redirect(url_for('showDevice',
                             electronic_name=electronic_name,
