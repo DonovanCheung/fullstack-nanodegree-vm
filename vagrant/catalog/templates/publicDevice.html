@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<link href='http://fonts.googleapis.com/css?family=Roboto:400,300,700' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+	<div style="margin: 50px">
+		<h1>Catalog App
+			<a href="/login">
+			<button class="btn btn-default" id="new-device">
+				Login
+			</button>
+			</a>
+		</h1>
+
+
+	</div>
+
+
+	<div class='flash'>
+		{% with messages = get_flashed_messages() %}
+		{% if messages %}
+
+		<ul>
+			{% for message in messages %}
+			<li> <strong> {{ message }} </strong> </li>
+			{% endfor %}
+		</ul>
+		{% endif %}
+		{% endwith %}
+
+	</div>
+
+	<div style="margin-left: 50px; margin-right: 50px">
+		<h2>{{device.name}}</h2>
+		<h4>{{device.brand}} - {{device.year}}</h4>
+		<p>Description: {{device.description}}</p>
+		<p>{{device.price}}</p>
+	</div>
+-
+</body>
+
+</html>

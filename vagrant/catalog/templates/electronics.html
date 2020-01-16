@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<link href='http://fonts.googleapis.com/css?family=Roboto:400,300,700' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+	<div style="margin: 50px">
+		<h1>Catalog App
+			<a href="/login">
+				<button class="btn btn-default" id="new-device">
+					Login
+				</button>
+				</a>
+		</h1>
+
+	</div>
+
+
+	<div class='flash'>
+		{% with messages = get_flashed_messages() %}
+		{% if messages %}
+
+		<ul>
+			{% for message in messages %}
+			<li> <strong> {{ message }} </strong> </li>
+			{% endfor %}
+		</ul>
+		{% endif %}
+		{% endwith %}
+
+	</div>
+
+	<div style="display: flex; background-color: #f0f0f0;">
+		<div style="flex: 30%; margin-left: 50px">
+			<h3>Electronics</h3>
+			{% for electronic in electronics %}
+			<div style="display: flex">
+				<a href="{{url_for('showElectronics', electronic_name=electronic.name)}}">
+					<div class="col-md-10 restaurant-list">
+						<h3>{{electronic.name.replace("-", " ").title()}}</h3>
+					</div>
+					<div class="col-md-1"></div>
+
+				</a>
+			</div>
+			{% endfor %}
+		</div>
+		<div style="flex: 70%">
+			<a href="/devices/new">
+				<h4>
+					Add Device
+				</h4>
+			</a>
+			<h3>{{type.title()}}</h3>
+			{% for device in devices %}
+			<div style="display: flex">
+				<a href="{{url_for('showDevice', electronic_name=device.electronics.name, device_id=device.id)}}">
+					<div class="col-md-10 restaurant-list">
+						<h3>{{device.name}}</h3>
+					</div>
+					<div class="col-md-1"></div>
+				</a>
+			</div>
+			{% endfor %}
+		</div>
+	</div>
+
+</body>
+
+</html>
