@@ -46,6 +46,8 @@ def gconnect():
     # Obtain authorization code
     code = request.data
 
+    print "this is the user id"
+    print login_session['user_id']
     try:
         # Upgrade the authorization code into a credentials object
         oauth_flow = flow_from_clientsecrets('client_secrets.json', scope='')
@@ -88,7 +90,7 @@ def gconnect():
     stored_access_token = login_session.get('access_token')
     stored_gplus_id = login_session.get('gplus_id')
     if (stored_access_token is not None and
-       gplus_id == stored_gplus_id):
+            gplus_id == stored_gplus_id):
         response = make_response(json.dumps(
             'Current user is already connected.'), 200)
         response.headers['Content-Type'] = 'application/json'
@@ -256,8 +258,8 @@ def editDevice(electronic_name, device_id):
         return redirect('/login')
     if editedDevice.user_id != login_session['user_id']:
         return """<script>function myFunction()\
-               {alert('You are not authorized to edit this restaurant.\
-               Please create your own restaurant in order to edit.');}\
+               {alert('You are not authorized to edit this device.\
+               Please create your own device in order to edit.');}\
                </script><body onload='myFunction()''>"""
     if request.method == 'POST':
         if request.form['name']:
@@ -271,8 +273,8 @@ def editDevice(electronic_name, device_id):
             session.commit()
             flash('Device Successfully Edited %s' % editedDevice.name)
             return redirect(url_for('showDevice',
-                            electronic_name=electronic_name,
-                            device_id=editedDevice.id))
+                                    electronic_name=electronic_name,
+                                    device_id=editedDevice.id))
     else:
         return render_template('editDevice.html', electronic=electronic_name,
                                device=editedDevice)
@@ -283,6 +285,13 @@ def editDevice(electronic_name, device_id):
 def deleteDevice(electronic_name, device_id):
     deviceToDelete = session.query(
         Device).filter_by(id=device_id).one()
+    if 'username' not in login_session:
+        return redirect('/login')
+    if deviceToDelete.user_id != login_session['user_id']:
+        return """<script>function myFunction()\
+               {alert('You are not authorized to delete this device.\
+               Please create your own device in order to delete.');}\
+               </script><body onload='myFunction()''>"""
     if request.method == 'POST':
         session.delete(deviceToDelete)
         session.commit()
@@ -300,6 +309,13 @@ def electronicsJSON(electronic_name):
     items = session.query(Device).filter_by(
         electronics_id=electronics.id).all()
     return jsonify(Electronics=[i.serialize for i in items])
+
+# JSON APIs to view a Device's Information
+@app.route('/electronics/<string:electronic_name>/<int:device_id>/JSON')
+def deviceJSON(electronic_name, device_id):
+    device = session.query(Device).filter_by(
+        id=device_id).one()
+    return jsonify(Device=device.serialize)
 
 
 if __name__ == '__main__':
